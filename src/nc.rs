@@ -49,7 +49,7 @@ impl Client {
         password: &str,
         forwarded_for: Vec<IpAddr>,
     ) -> Result<Response, NextCloudError> {
-        self.http
+        let r = self.http
             .get(self.base_url.join("index.php/apps/notify_push/uid")?)
             .basic_auth(username, Some(password))
             .header(
@@ -67,7 +67,8 @@ impl Client {
             )
             .send()
             .await
-            .map_err(NextCloudError::NextcloudConnect)
+            .map_err(NextCloudError::NextcloudConnect);
+        r
     }
 
     pub async fn get_test_cookie(&self) -> Result<u32, NextCloudError> {
@@ -113,14 +114,15 @@ impl Client {
     }
 
     /// Ask the app to put it's version number into redis under 'notify_push_app_version'
-    pub async fn request_app_version(&self) -> Result<(), NextCloudError> {
-        self.http
+    pub async fn request_app_version(&self) -> Result<String, NextCloudError> {
+        let r = self.http
             .get(
                 self.base_url
                     .join("index.php/apps/notify_push/test/version")?,
             )
             .send()
             .await?;
-        Ok(())
+        let x = r.text().await?;
+        Ok(x)
     }
 }

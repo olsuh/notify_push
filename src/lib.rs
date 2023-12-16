@@ -117,13 +117,14 @@ impl App {
     }
 
     pub async fn self_test(&self) -> Result<(), SelfTestError> {
-        let _ = self
+        let _x = self
             .storage_mapping
             .get_users_for_storage_path(1, "")
             .await?;
         let mut redis = self.redis.connect().await?;
         redis.del("notify_push_app_version").await?;
-        self.nc_client.request_app_version().await?;
+        let r = self.nc_client.request_app_version().await?;
+        log::info!("self_test: nc_client.request_app_version() {r}");
         match redis.get("notify_push_app_version").await {
             Ok(version) if version == env!("NOTIFY_PUSH_VERSION") => {}
             Ok(version) => {
@@ -133,7 +134,9 @@ impl App {
                     version
                 );
             }
-            Err(_) => {}
+            Err(e) => {
+                log::warn!("self_test: redis.get(\"notify_push_app_version\"): {e}");
+            }
         }
 
         Ok(())

@@ -8,7 +8,7 @@ use tungstenite::{connect, Message};
 use url::Url;
 
 fn main() -> Result<()> {
-    Logger::try_with_str(&var("LOG").unwrap_or_else(|_| String::from("test_client=info,warn")))
+    Logger::try_with_str(&var("LOG").unwrap_or_else(|_| String::from("test_client=trace,warn")))
         .into_diagnostic()?
         .adaptive_format_for_stdout(AdaptiveFormat::Detailed)
         .adaptive_format_for_stderr(AdaptiveFormat::Detailed)
@@ -22,7 +22,7 @@ fn main() -> Result<()> {
         (Some(host), Some(username), Some(password)) => (host, username, password),
         _ => {
             eprintln!("usage {} <nextcloud url> <username> <password>", bin);
-            return Ok(());
+            ("ws://localhost:17867/ws".to_owned(), "admin2".to_owned(), "admin2admin2".to_owned())
         }
     };
 
